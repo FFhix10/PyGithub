@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2012 Vincent Jacques <vincent@vincent-jacques.net>                 #
@@ -53,12 +51,10 @@ class PaginatedListBase:
             return self._Slice(self, index)
 
     def __iter__(self):
-        for element in self.__elements:
-            yield element
+        yield from self.__elements
         while self._couldGrow():
             newElements = self._grow()
-            for element in newElements:
-                yield element
+            yield from newElements
 
     def _isBiggerThan(self, index):
         return len(self.__elements) > index or self._couldGrow()
@@ -94,7 +90,7 @@ class PaginatedListBase:
 
 class PaginatedList(PaginatedListBase):
     """
-    This class abstracts the `pagination of the API <http://developer.github.com/v3/#pagination>`_.
+    This class abstracts the `pagination of the API <https://docs.github.com/en/rest/guides/traversing-with-pagination>`_.
 
     You can simply enumerate through instances of this class::
 
@@ -157,6 +153,8 @@ class PaginatedList(PaginatedListBase):
                 if data and "total_count" in data:
                     self.__totalCount = data["total_count"]
                 elif data:
+                    if isinstance(data, dict):
+                        data = data[self.__list_item]
                     self.__totalCount = len(data)
                 else:
                     self.__totalCount = 0

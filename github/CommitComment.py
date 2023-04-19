@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2012 Vincent Jacques <vincent@vincent-jacques.net>                 #
@@ -41,7 +39,7 @@ from . import Consts
 
 class CommitComment(github.GithubObject.CompletableGithubObject):
     """
-    This class represents CommitComments. The reference can be found here https://developer.github.com/v3/repos/comments/
+    This class represents CommitComments. The reference can be found here https://docs.github.com/en/rest/reference/repos#comments
     """
 
     def __repr__(self):
@@ -137,14 +135,14 @@ class CommitComment(github.GithubObject.CompletableGithubObject):
 
     def delete(self):
         """
-        :calls: `DELETE /repos/:owner/:repo/comments/:id <http://developer.github.com/v3/repos/comments>`_
+        :calls: `DELETE /repos/{owner}/{repo}/comments/{id} <https://docs.github.com/en/rest/reference/repos#comments>`_
         :rtype: None
         """
         headers, data = self._requester.requestJsonAndCheck("DELETE", self.url)
 
     def edit(self, body):
         """
-        :calls: `PATCH /repos/:owner/:repo/comments/:id <http://developer.github.com/v3/repos/comments>`_
+        :calls: `PATCH /repos/{owner}/{repo}/comments/{id} <https://docs.github.com/en/rest/reference/repos#comments>`_
         :param body: string
         :rtype: None
         """
@@ -159,22 +157,22 @@ class CommitComment(github.GithubObject.CompletableGithubObject):
 
     def get_reactions(self):
         """
-        :calls: `GET /repos/:owner/:repo/comments/:id/reactions
-                <https://developer.github.com/v3/reactions/#list-reactions-for-a-commit-comment>`_
+        :calls: `GET /repos/{owner}/{repo}/comments/{id}/reactions
+                <https://docs.github.com/en/rest/reference/reactions#list-reactions-for-a-commit-comment>`_
         :return: :class: :class:`github.PaginatedList.PaginatedList` of :class:`github.Reaction.Reaction`
         """
         return github.PaginatedList.PaginatedList(
             github.Reaction.Reaction,
             self._requester,
-            self.url + "/reactions",
+            f"{self.url}/reactions",
             None,
             headers={"Accept": Consts.mediaTypeReactionsPreview},
         )
 
     def create_reaction(self, reaction_type):
         """
-        :calls: `POST /repos/:owner/:repo/comments/:id/reactions
-                <https://developer.github.com/v3/reactions/#create-reaction-for-a-commit-comment>`_
+        :calls: `POST /repos/{owner}/{repo}/comments/{id}/reactions
+                <https://docs.github.com/en/rest/reference/reactions#create-reaction-for-a-commit-comment>`_
         :param reaction_type: string
         :rtype: :class:`github.Reaction.Reaction`
         """
@@ -184,7 +182,7 @@ class CommitComment(github.GithubObject.CompletableGithubObject):
         }
         headers, data = self._requester.requestJsonAndCheck(
             "POST",
-            self.url + "/reactions",
+            f"{self.url}/reactions",
             input=post_parameters,
             headers={"Accept": Consts.mediaTypeReactionsPreview},
         )
@@ -192,15 +190,15 @@ class CommitComment(github.GithubObject.CompletableGithubObject):
 
     def delete_reaction(self, reaction_id):
         """
-        :calls: `DELETE /repos/:owner/:repo/comments/:comment_id/reactions/:reaction_id
-                <https://developer.github.com/v3/reactions/#delete-a-commit-comment-reaction>`_
+        :calls: `DELETE /repos/{owner}/{repo}/comments/{comment_id}/reactions/{reaction_id}
+                <https://docs.github.com/en/rest/reference/reactions#delete-a-commit-comment-reaction>`_
         :param reaction_id: integer
         :rtype: bool
         """
         assert isinstance(reaction_id, int), reaction_id
         status, _, _ = self._requester.requestJson(
             "DELETE",
-            self.url + "/reactions/" + str(reaction_id),
+            f"{self.url}/reactions/{reaction_id}",
             headers={"Accept": Consts.mediaTypeReactionsPreview},
         )
         return status == 204

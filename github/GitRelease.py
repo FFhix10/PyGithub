@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2015 Ed Holland <eholland@alertlogic.com>                          #
@@ -46,7 +44,7 @@ from . import Consts
 
 class GitRelease(github.GithubObject.CompletableGithubObject):
     """
-    This class represents GitReleases. The reference can be found here https://developer.github.com/v3/repos/releases
+    This class represents GitReleases. The reference can be found here https://docs.github.com/en/rest/reference/repos#releases
     """
 
     def __repr__(self):
@@ -172,9 +170,17 @@ class GitRelease(github.GithubObject.CompletableGithubObject):
         self._completeIfNotSet(self._zipball_url)
         return self._zipball_url.value
 
+    @property
+    def assets(self):
+        """
+        :type: list of :class:`github.GitReleaseAsset.GitReleaseAsset`
+        """
+        self._completeIfNotSet(self._assets)
+        return self._assets.value
+
     def delete_release(self):
         """
-        :calls: `DELETE /repos/:owner/:repo/releases/:release_id <https://developer.github.com/v3/repos/releases/#delete-a-release>`_
+        :calls: `DELETE /repos/{owner}/{repo}/releases/{release_id} <https://docs.github.com/en/rest/reference/repos#delete-a-release>`_
         :rtype: None
         """
         headers, data = self._requester.requestJsonAndCheck("DELETE", self.url)
@@ -189,7 +195,7 @@ class GitRelease(github.GithubObject.CompletableGithubObject):
         target_commitish=github.GithubObject.NotSet,
     ):
         """
-        :calls: `PATCH /repos/:owner/:repo/releases/:release_id <https://developer.github.com/v3/repos/releases/#edit-a-release>`_
+        :calls: `PATCH /repos/{owner}/{repo}/releases/{release_id} <https://docs.github.com/en/rest/reference/repos#update-a-release>`_
         :param name: string
         :param message: string
         :param draft: bool
@@ -236,7 +242,7 @@ class GitRelease(github.GithubObject.CompletableGithubObject):
         name=github.GithubObject.NotSet,
     ):
         """
-        :calls: `POST https://<upload_url>/repos/:owner/:repo/releases/:release_id/assets <https://developer.github.com/v3/repos/releases/#upload-a-release-asset>`_
+        :calls: `POST https://<upload_url>/repos/{owner}/{repo}/releases/{release_id}/assets <https://docs.github.com/en/rest/reference/repos#upload-a-release-asset>`_
         :param path: string
         :param label: string
         :param content_type: string
@@ -276,7 +282,7 @@ class GitRelease(github.GithubObject.CompletableGithubObject):
     ):
         """Uploads an asset. Unlike ``upload_asset()`` this method allows you to pass in a file-like object to upload.
         Note that this method is more strict and requires you to specify the ``name``, since there's no file name to infer these from.
-        :calls: `POST https://<upload_url>/repos/:owner/:repo/releases/:release_id/assets <https://developer.github.com/v3/repos/releases/#upload-a-release-asset>`_
+        :calls: `POST https://<upload_url>/repos/{owner}/{repo}/releases/{release_id}/assets <https://docs.github.com/en/rest/reference/repos#upload-a-release-asset>`_
         :param file_like: binary file-like object, such as those returned by ``open("file_name", "rb")``. At the very minimum, this object must implement ``read()``.
         :param file_size: int, size in bytes of ``file_like``
         :param content_type: string
@@ -309,13 +315,13 @@ class GitRelease(github.GithubObject.CompletableGithubObject):
 
     def get_assets(self):
         """
-        :calls: `GET /repos/:owner/:repo/releases/:release_id/assets <https://developer.github.com/v3/repos/releases/#list-assets-for-a-release>`_
+        :calls: `GET /repos/{owner}/{repo}/releases/{release_id}/assets <https://docs.github.com/en/rest/reference/repos#list-release-assets>`_
         :rtype: :class:`github.PaginatedList.PaginatedList`
         """
         return github.PaginatedList.PaginatedList(
             github.GitReleaseAsset.GitReleaseAsset,
             self._requester,
-            self.url + "/assets",
+            f"{self.url}/assets",
             None,
         )
 
@@ -335,6 +341,7 @@ class GitRelease(github.GithubObject.CompletableGithubObject):
         self._published_at = github.GithubObject.NotSet
         self._tarball_url = github.GithubObject.NotSet
         self._zipball_url = github.GithubObject.NotSet
+        self._assets = github.GithubObject.NotSet
 
     def _useAttributes(self, attributes):
         if "id" in attributes:
@@ -371,3 +378,7 @@ class GitRelease(github.GithubObject.CompletableGithubObject):
             self._tarball_url = self._makeStringAttribute(attributes["tarball_url"])
         if "zipball_url" in attributes:
             self._zipball_url = self._makeStringAttribute(attributes["zipball_url"])
+        if "assets" in attributes:
+            self._assets = self._makeListOfClassesAttribute(
+                github.GitReleaseAsset.GitReleaseAsset, attributes["assets"]
+            )

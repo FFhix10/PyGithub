@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2013 AKFish <akfish@gmail.com>                                     #
@@ -101,7 +99,10 @@ mediaTypeRequireMultipleApprovingReviews = (
 # https://developer.github.com/changes/2018-05-24-user-migration-api/
 mediaTypeMigrationPreview = "application/vnd.github.wyandotte-preview+json"
 
-# https://developer.github.com/v3/search/#highlighting-code-search-results-1
+# https://developer.github.com/changes/2019-07-16-repository-templates-api/
+mediaTypeTemplatesPreview = "application/vnd.github.baptiste-preview+json"
+
+# https://docs.github.com/en/rest/reference/search#highlighting-code-search-results-1
 highLightSearchPreview = "application/vnd.github.v3.text-match+json"
 
 # https://developer.github.com/changes/2018-02-22-protected-branches-required-signatures/
@@ -119,7 +120,7 @@ updateBranchPreview = "application/vnd.github.lydian-preview+json"
 # https://developer.github.com/changes/2016-05-23-timeline-preview-api/
 issueTimelineEventsPreview = "application/vnd.github.mockingbird-preview"
 
-# https://developer.github.com/v3/teams/#check-if-a-team-manages-a-repository
+# https://docs.github.com/en/rest/reference/teams#check-if-a-team-manages-a-repository
 teamRepositoryPermissions = "application/vnd.github.v3.repository+json"
 
 # https://developer.github.com/changes/2016-04-06-deployment-and-deployment-status-enhancements/
@@ -127,3 +128,23 @@ deploymentEnhancementsPreview = "application/vnd.github.ant-man-preview+json"
 
 # https://developer.github.com/changes/2018-10-16-deployments-environments-states-and-auto-inactive-updates/
 deploymentStatusEnhancementsPreview = "application/vnd.github.flash-preview+json"
+
+# https://developer.github.com/changes/2019-12-03-internal-visibility-changes/
+repoVisibilityPreview = "application/vnd.github.nebula-preview+json"
+
+DEFAULT_BASE_URL = "https://api.github.com"
+DEFAULT_STATUS_URL = "https://status.github.com"
+# As of 2018-05-17, Github imposes a 10s limit for completion of API requests.
+# Thus, the timeout should be slightly > 10s to account for network/front-end
+# latency.
+DEFAULT_TIMEOUT = 15
+DEFAULT_PER_PAGE = 30
+
+# JWT expiry in seconds. Could be set for max 600 seconds (10 minutes).
+# https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#authenticating-as-a-github-app
+DEFAULT_JWT_EXPIRY = 300
+MIN_JWT_EXPIRY = 15
+MAX_JWT_EXPIRY = 600
+# https://docs.github.com/en/developers/apps/building-github-apps/authenticating-with-github-apps#generating-a-json-web-token-jwt
+# "The time the JWT was created. To protect against clock drift, we recommend you set this 60 seconds in the past."
+DEFAULT_JWT_ISSUED_AT = -60

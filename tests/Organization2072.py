@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
-# Copyright 2013 Vincent Jacques <vincent@vincent-jacques.net>                 #
-# Copyright 2014 Vincent Jacques <vincent@vincent-jacques.net>                 #
-# Copyright 2016 Peter Buckley <dx-pbuckley@users.noreply.github.com>          #
-# Copyright 2018 sfdye <tsfdye@gmail.com>                                      #
+# Copyright 2021 James Simpson <james@snowterminal.com>                        #
 #                                                                              #
 # This file is part of PyGithub.                                               #
 # http://pygithub.readthedocs.io/                                              #
@@ -25,28 +20,21 @@
 #                                                                              #
 ################################################################################
 
-import warnings
-
-import github
-
 from . import Framework
 
 
-class Issue158(Framework.TestCase):  # https://github.com/jacquev6/PyGithub/issues/158
+class Organization2072(Framework.TestCase):
     def setUp(self):
         super().setUp()
-        # Ignore the warning since client_{id,secret} are deprecated
-        warnings.filterwarnings("ignore", category=FutureWarning)
+        self.org = self.g.get_organization("TestOrganization2072")
 
-    def tearDown(self):
-        super().tearDown()
-        warnings.resetwarnings()
-
-    # Warning: I don't have a scret key, so the requests for this test are forged
-    def testPaginationWithSecretKeyAuthentication(self):
-        g = github.Github(client_id=self.client_id, client_secret=self.client_secret)
-        self.assertListKeyEqual(
-            g.get_organization("BeaverSoftware").get_repos("public"),
-            lambda r: r.name,
-            ["FatherBeaver", "PyGithub"],
+    def testCancelInvitation(self):
+        self.assertFalse(
+            any([i for i in self.org.invitations() if i.email == "foo@bar.org"])
         )
+        self.org.invite_user(email="foo@bar.org")
+        self.assertTrue(
+            any([i for i in self.org.invitations() if i.email == "foo@bar.org"])
+        )
+        invitation = [i for i in self.org.invitations() if i.email == "foo@bar.org"][0]
+        self.assertTrue(self.org.cancel_invitation(invitation))

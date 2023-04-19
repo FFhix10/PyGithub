@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 ############################ Copyrights and license ############################
 #                                                                              #
@@ -56,7 +55,7 @@ types = {
     ),
     "datetime": (
         "datetime.datetime",
-        "(str, unicode)",
+        "str",
         'self._makeDatetimeAttribute(attributes["' + attributeName + '"])',
     ),
     "class": (
@@ -120,7 +119,7 @@ while not added:
 
 added = False
 
-inInit = False
+inInit = line.endswith("def _initAttributes(self):")
 while not added:
     line = lines[i].rstrip()
     i += 1

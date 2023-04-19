@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2012 Vincent Jacques <vincent@vincent-jacques.net>                 #
@@ -59,6 +57,9 @@ class Team(Framework.TestCase):
         self.assertEqual(self.team.parent, None)
         self.assertEqual(
             repr(self.team), 'Team(name="Team created by PyGithub", id=189850)'
+        )
+        self.assertEqual(
+            self.team.html_url, "https://github.com/orgs/BeaverSoftware/teams/core"
         )
 
     def testDiscussions(self):

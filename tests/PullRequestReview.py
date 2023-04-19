@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2017 Aaron Levine <allevin@sandia.gov>                             #
@@ -34,6 +32,7 @@ from . import Framework
 class PullRequestReview(Framework.TestCase):
     def setUp(self):
         super().setUp()
+
         self.repo = self.g.get_repo("PyGithub/PyGithub", lazy=True)
         self.pull = self.repo.get_pull(538)
 

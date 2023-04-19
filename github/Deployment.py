@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2020 Steve Kowalik <steven@wedontsleep.org>                        #
@@ -31,7 +29,7 @@ import github.GithubObject
 
 class Deployment(github.GithubObject.CompletableGithubObject):
     """
-    This class represents Deployments. The reference can be found here https://developer.github.com/v3/repos/deployments
+    This class represents Deployments. The reference can be found here https://docs.github.com/en/rest/reference/repos#deployments
     """
 
     def __repr__(self):
@@ -159,27 +157,27 @@ class Deployment(github.GithubObject.CompletableGithubObject):
 
     def get_statuses(self):
         """
-        :calls: `GET /repos/:owner/deployments/:deployment_id/statuses <https://developer.github.com/v3/repos/deployments/#list-deployment-statuses>`_
+        :calls: `GET /repos/{owner}/deployments/{deployment_id}/statuses <https://docs.github.com/en/rest/reference/repos#list-deployments>`_
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.DeploymentStatus.DeploymentStatus`
         """
         return github.PaginatedList.PaginatedList(
             github.DeploymentStatus.DeploymentStatus,
             self._requester,
-            self.url + "/statuses",
+            f"{self.url}/statuses",
             None,
             headers={"Accept": self._get_accept_header()},
         )
 
     def get_status(self, id_):
         """
-        :calls: `GET /repos/:owner/deployments/:deployment_id/statuses/:status_id  <https://developer.github.com/v3/repos/deployments/#get-a-deployment-status>`_
+        :calls: `GET /repos/{owner}/deployments/{deployment_id}/statuses/{status_id}  <https://docs.github.com/en/rest/reference/repos#get-a-deployment>`_
         :param id_: int
         :rtype: :class:`github.DeploymentStatus.DeploymentStatus`
         """
         assert isinstance(id_, int), id_
         headers, data = self._requester.requestJsonAndCheck(
             "GET",
-            self.url + "/statuses/" + str(id_),
+            f"{self.url}/statuses/{id_}",
             headers={"Accept": self._get_accept_header()},
         )
         return github.DeploymentStatus.DeploymentStatus(
@@ -196,7 +194,7 @@ class Deployment(github.GithubObject.CompletableGithubObject):
         auto_inactive=github.GithubObject.NotSet,
     ):
         """
-        :calls: `POST /repos/:owner/:repo/deployments/:deployment_id/statuses <https://developer.github.com/v3/repos/deployments/#create-a-deployment-status>`_
+        :calls: `POST /repos/{owner}/{repo}/deployments/{deployment_id}/statuses <https://docs.github.com/en/rest/reference/repos#create-a-deployment-status>`_
         :param: state: string
         :param: target_url: string
         :param: description: string
@@ -236,7 +234,7 @@ class Deployment(github.GithubObject.CompletableGithubObject):
 
         headers, data = self._requester.requestJsonAndCheck(
             "POST",
-            self.url + "/statuses",
+            f"{self.url}/statuses",
             input=post_parameters,
             headers={"Accept": self._get_accept_header()},
         )

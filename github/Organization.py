@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2012 Steve English <steve.english@navetas.com>                     #
@@ -57,7 +55,7 @@ from . import Consts
 
 class Organization(github.GithubObject.CompletableGithubObject):
     """
-    This class represents Organizations. The reference can be found here http://developer.github.com/v3/orgs/
+    This class represents Organizations. The reference can be found here https://docs.github.com/en/rest/reference/orgs
     """
 
     def __repr__(self):
@@ -361,7 +359,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
 
     def add_to_members(self, member, role=github.GithubObject.NotSet):
         """
-        :calls: `PUT /orgs/:org/memberships/:user <https://developer.github.com/v3/orgs/members/#add-or-update-organization-membership>`_
+        :calls: `PUT /orgs/{org}/memberships/{user} <https://docs.github.com/en/rest/reference/orgs#update-an-organization-membership-for-the-authenticated-user>`_
         :param member: :class:`github.NamedUser.NamedUser`
         :param role: string
         :rtype: None
@@ -372,23 +370,23 @@ class Organization(github.GithubObject.CompletableGithubObject):
         if role is not github.GithubObject.NotSet:
             put_parameters["role"] = role
         headers, data = self._requester.requestJsonAndCheck(
-            "PUT", self.url + "/memberships/" + member._identity, input=put_parameters
+            "PUT", f"{self.url}/memberships/{member._identity}", input=put_parameters
         )
 
     def add_to_public_members(self, public_member):
         """
-        :calls: `PUT /orgs/:org/public_members/:user <http://developer.github.com/v3/orgs/members>`_
+        :calls: `PUT /orgs/{org}/public_members/{user} <https://docs.github.com/en/rest/reference/orgs#members>`_
         :param public_member: :class:`github.NamedUser.NamedUser`
         :rtype: None
         """
         assert isinstance(public_member, github.NamedUser.NamedUser), public_member
         headers, data = self._requester.requestJsonAndCheck(
-            "PUT", self.url + "/public_members/" + public_member._identity
+            "PUT", f"{self.url}/public_members/{public_member._identity}"
         )
 
     def create_fork(self, repo):
         """
-        :calls: `POST /repos/:owner/:repo/forks <http://developer.github.com/v3/repos/forks>`_
+        :calls: `POST /repos/{owner}/{repo}/forks <https://docs.github.com/en/rest/reference/repos#forks>`_
         :param repo: :class:`github.Repository.Repository`
         :rtype: :class:`github.Repository.Repository`
         """
@@ -398,8 +396,49 @@ class Organization(github.GithubObject.CompletableGithubObject):
         }
         headers, data = self._requester.requestJsonAndCheck(
             "POST",
-            "/repos/" + repo.owner.login + "/" + repo.name + "/forks",
+            f"/repos/{repo.owner.login}/{repo.name}/forks",
             parameters=url_parameters,
+        )
+        return github.Repository.Repository(
+            self._requester, headers, data, completed=True
+        )
+
+    def create_repo_from_template(
+        self,
+        name,
+        repo,
+        description=github.GithubObject.NotSet,
+        private=github.GithubObject.NotSet,
+    ):
+        """self.name
+        :calls: `POST /repos/{template_owner}/{template_repo}/generate <https://docs.github.com/en/rest/reference/repos#create-a-repository-using-a-template>`_
+        :param name: string
+        :param repo :class:`github.Repository.Repository`
+        :param description: string
+        :param private: bool
+        :rtype: :class:`github.Repository.Repository`
+        """
+        assert isinstance(name, str), name
+        assert isinstance(repo, github.Repository.Repository), repo
+        assert description is github.GithubObject.NotSet or isinstance(
+            description, str
+        ), description
+        assert private is github.GithubObject.NotSet or isinstance(
+            private, bool
+        ), private
+        post_parameters = {
+            "name": name,
+            "owner": self.login,
+        }
+        if description is not github.GithubObject.NotSet:
+            post_parameters["description"] = description
+        if private is not github.GithubObject.NotSet:
+            post_parameters["private"] = private
+        headers, data = self._requester.requestJsonAndCheck(
+            "POST",
+            f"/repos/{repo.owner.login}/{repo.name}/generate",
+            input=post_parameters,
+            headers={"Accept": "application/vnd.github.v3+json"},
         )
         return github.Repository.Repository(
             self._requester, headers, data, completed=True
@@ -413,7 +452,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
         active=github.GithubObject.NotSet,
     ):
         """
-        :calls: `POST /orgs/:owner/hooks <http://developer.github.com/v3/orgs/hooks>`_
+        :calls: `POST /orgs/{owner}/hooks <https://docs.github.com/en/rest/reference/orgs#webhooks>`_
         :param name: string
         :param config: dict
         :param events: list of string
@@ -435,13 +474,13 @@ class Organization(github.GithubObject.CompletableGithubObject):
         if active is not github.GithubObject.NotSet:
             post_parameters["active"] = active
         headers, data = self._requester.requestJsonAndCheck(
-            "POST", self.url + "/hooks", input=post_parameters
+            "POST", f"{self.url}/hooks", input=post_parameters
         )
         return github.Hook.Hook(self._requester, headers, data, completed=True)
 
     def create_project(self, name, body=github.GithubObject.NotSet):
         """
-        :calls: `POST /orgs/:org/projects <https://developer.github.com/v3/projects/#create-an-organization-project>`_
+        :calls: `POST /orgs/{org}/projects <https://docs.github.com/en/rest/reference/projects#create-an-organization-project>`_
         :param name: string
         :param body: string
         :rtype: :class:`github.Project.Project`
@@ -453,7 +492,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
             post_parameters["body"] = body
         headers, data = self._requester.requestJsonAndCheck(
             "POST",
-            self.url + "/projects",
+            f"{self.url}/projects",
             input=post_parameters,
             headers={"Accept": Consts.mediaTypeProjectsPreview},
         )
@@ -465,6 +504,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
         description=github.GithubObject.NotSet,
         homepage=github.GithubObject.NotSet,
         private=github.GithubObject.NotSet,
+        visibility=github.GithubObject.NotSet,
         has_issues=github.GithubObject.NotSet,
         has_wiki=github.GithubObject.NotSet,
         has_downloads=github.GithubObject.NotSet,
@@ -479,7 +519,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
         delete_branch_on_merge=github.GithubObject.NotSet,
     ):
         """
-        :calls: `POST /orgs/:org/repos <http://developer.github.com/v3/repos>`_
+        :calls: `POST /orgs/{org}/repos <https://docs.github.com/en/rest/reference/repos>`_
         :param name: string
         :param description: string
         :param homepage: string
@@ -508,6 +548,9 @@ class Organization(github.GithubObject.CompletableGithubObject):
         assert private is github.GithubObject.NotSet or isinstance(
             private, bool
         ), private
+        assert visibility is github.GithubObject.NotSet or isinstance(
+            visibility, str
+        ), visibility
         assert has_issues is github.GithubObject.NotSet or isinstance(
             has_issues, bool
         ), has_issues
@@ -553,6 +596,8 @@ class Organization(github.GithubObject.CompletableGithubObject):
             post_parameters["homepage"] = homepage
         if private is not github.GithubObject.NotSet:
             post_parameters["private"] = private
+        if visibility is not github.GithubObject.NotSet:
+            post_parameters["visibility"] = visibility
         if has_issues is not github.GithubObject.NotSet:
             post_parameters["has_issues"] = has_issues
         if has_wiki is not github.GithubObject.NotSet:
@@ -578,11 +623,57 @@ class Organization(github.GithubObject.CompletableGithubObject):
         if delete_branch_on_merge is not github.GithubObject.NotSet:
             post_parameters["delete_branch_on_merge"] = delete_branch_on_merge
         headers, data = self._requester.requestJsonAndCheck(
-            "POST", self.url + "/repos", input=post_parameters
+            "POST",
+            f"{self.url}/repos",
+            input=post_parameters,
+            headers={"Accept": Consts.repoVisibilityPreview},
         )
         return github.Repository.Repository(
             self._requester, headers, data, completed=True
         )
+
+    def create_secret(
+        self,
+        secret_name,
+        unencrypted_value,
+        visibility="all",
+        selected_repositories=github.GithubObject.NotSet,
+    ):
+        """
+        :calls: `PUT /orgs/{org}/actions/secrets/{secret_name} <https://docs.github.com/en/rest/reference/actions#create-or-update-an-organization-secret>`_
+        :param secret_name: string
+        :param unencrypted_value: string
+        :param visibility: string
+        :param selected_repositories: list of :class:`github.Repository.Repository`
+        :rtype: bool
+        """
+        assert isinstance(secret_name, str), secret_name
+        assert isinstance(unencrypted_value, str), unencrypted_value
+        assert isinstance(visibility, str), visibility
+        if visibility == "selected":
+            assert isinstance(selected_repositories, list) and all(
+                isinstance(element, github.Repository.Repository)
+                for element in selected_repositories
+            ), selected_repositories
+        else:
+            assert selected_repositories is github.GithubObject.NotSet
+
+        public_key = self.get_public_key()
+        payload = public_key.encrypt(unencrypted_value)
+        put_parameters = {
+            "key_id": public_key.key_id,
+            "encrypted_value": payload,
+            "visibility": visibility,
+        }
+        if selected_repositories is not github.GithubObject.NotSet:
+            put_parameters["selected_repository_ids"] = [
+                element.id for element in selected_repositories
+            ]
+
+        status, headers, data = self._requester.requestJson(
+            "PUT", f"{self.url}/actions/secrets/{secret_name}", input=put_parameters
+        )
+        return status == 201
 
     def create_team(
         self,
@@ -593,7 +684,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
         description=github.GithubObject.NotSet,
     ):
         """
-        :calls: `POST /orgs/:org/teams <http://developer.github.com/v3/orgs/teams>`_
+        :calls: `POST /orgs/{org}/teams <https://docs.github.com/en/rest/reference/teams#list-teams>`_
         :param name: string
         :param repo_names: list of :class:`github.Repository.Repository`
         :param permission: string
@@ -628,20 +719,32 @@ class Organization(github.GithubObject.CompletableGithubObject):
         if description is not github.GithubObject.NotSet:
             post_parameters["description"] = description
         headers, data = self._requester.requestJsonAndCheck(
-            "POST", self.url + "/teams", input=post_parameters
+            "POST", f"{self.url}/teams", input=post_parameters
         )
         return github.Team.Team(self._requester, headers, data, completed=True)
 
     def delete_hook(self, id):
         """
-        :calls: `DELETE /orgs/:owner/hooks/:id <http://developer.github.com/v3/orgs/hooks>`_
+        :calls: `DELETE /orgs/{owner}/hooks/{id} <https://docs.github.com/en/rest/reference/orgs#webhooks>`_
         :param id: integer
         :rtype: None`
         """
         assert isinstance(id, int), id
         headers, data = self._requester.requestJsonAndCheck(
-            "DELETE", self.url + "/hooks/" + str(id)
+            "DELETE", f"{self.url}/hooks/{id}"
         )
+
+    def delete_secret(self, secret_name):
+        """
+        :calls: `DELETE /orgs/{org}/actions/secrets/{secret_name} <https://docs.github.com/en/rest/reference/actions#delete-an-organization-secret>`_
+        :param secret_name: string
+        :rtype: bool
+        """
+        assert isinstance(secret_name, str), secret_name
+        status, headers, data = self._requester.requestJson(
+            "DELETE", f"{self.url}/actions/secrets/{secret_name}"
+        )
+        return status == 204
 
     def edit(
         self,
@@ -654,7 +757,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
         name=github.GithubObject.NotSet,
     ):
         """
-        :calls: `PATCH /orgs/:org <http://developer.github.com/v3/orgs>`_
+        :calls: `PATCH /orgs/{org} <https://docs.github.com/en/rest/reference/orgs>`_
         :param billing_email: string
         :param blog: string
         :param company: string
@@ -708,7 +811,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
         active=github.GithubObject.NotSet,
     ):
         """
-        :calls: `PATCH /orgs/:owner/hooks/:id <http://developer.github.com/v3/orgs/hooks>`_
+        :calls: `PATCH /orgs/{owner}/hooks/{id} <https://docs.github.com/en/rest/reference/orgs#webhooks>`_
         :param id: integer
         :param name: string
         :param config: dict
@@ -732,38 +835,38 @@ class Organization(github.GithubObject.CompletableGithubObject):
         if active is not github.GithubObject.NotSet:
             post_parameters["active"] = active
         headers, data = self._requester.requestJsonAndCheck(
-            "PATCH", self.url + "/hooks/" + str(id), input=post_parameters
+            "PATCH", f"{self.url}/hooks/{id}", input=post_parameters
         )
         return github.Hook.Hook(self._requester, headers, data, completed=True)
 
     def get_events(self):
         """
-        :calls: `GET /orgs/:org/events <http://developer.github.com/v3/activity/events>`_
+        :calls: `GET /orgs/{org}/events <https://docs.github.com/en/rest/reference/activity#events>`_
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.Event.Event`
         """
         return github.PaginatedList.PaginatedList(
-            github.Event.Event, self._requester, self.url + "/events", None
+            github.Event.Event, self._requester, f"{self.url}/events", None
         )
 
     def get_hook(self, id):
         """
-        :calls: `GET /orgs/:owner/hooks/:id <http://developer.github.com/v3/orgs/hooks>`_
+        :calls: `GET /orgs/{owner}/hooks/{id} <https://docs.github.com/en/rest/reference/orgs#webhooks>`_
         :param id: integer
         :rtype: :class:`github.Hook.Hook`
         """
         assert isinstance(id, int), id
         headers, data = self._requester.requestJsonAndCheck(
-            "GET", self.url + "/hooks/" + str(id)
+            "GET", f"{self.url}/hooks/{id}"
         )
         return github.Hook.Hook(self._requester, headers, data, completed=True)
 
     def get_hooks(self):
         """
-        :calls: `GET /orgs/:owner/hooks <http://developer.github.com/v3/orgs/hooks>`_
+        :calls: `GET /orgs/{owner}/hooks <https://docs.github.com/en/rest/reference/orgs#webhooks>`_
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.Hook.Hook`
         """
         return github.PaginatedList.PaginatedList(
-            github.Hook.Hook, self._requester, self.url + "/hooks", None
+            github.Hook.Hook, self._requester, f"{self.url}/hooks", None
         )
 
     def get_issues(
@@ -776,7 +879,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
         since=github.GithubObject.NotSet,
     ):
         """
-        :calls: `GET /orgs/:org/issues <http://developer.github.com/v3/issues>`_
+        :calls: `GET /orgs/{org}/issues <https://docs.github.com/en/rest/reference/issues>`_
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.Issue.Issue`
         :param filter: string
         :param state: string
@@ -812,14 +915,14 @@ class Organization(github.GithubObject.CompletableGithubObject):
         if since is not github.GithubObject.NotSet:
             url_parameters["since"] = since.strftime("%Y-%m-%dT%H:%M:%SZ")
         return github.PaginatedList.PaginatedList(
-            github.Issue.Issue, self._requester, self.url + "/issues", url_parameters
+            github.Issue.Issue, self._requester, f"{self.url}/issues", url_parameters
         )
 
     def get_members(
         self, filter_=github.GithubObject.NotSet, role=github.GithubObject.NotSet
     ):
         """
-        :calls: `GET /orgs/:org/members <http://developer.github.com/v3/orgs/members>`_
+        :calls: `GET /orgs/{org}/members <https://docs.github.com/en/rest/reference/orgs#members>`_
         :param filter_: string
         :param role: string
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.NamedUser.NamedUser`
@@ -837,13 +940,13 @@ class Organization(github.GithubObject.CompletableGithubObject):
         return github.PaginatedList.PaginatedList(
             github.NamedUser.NamedUser,
             self._requester,
-            self.url + "/members",
+            f"{self.url}/members",
             url_parameters,
         )
 
     def get_projects(self, state=github.GithubObject.NotSet):
         """
-        :calls: `GET /orgs/:org/projects <https://developer.github.com/v3/projects/#list-organization-projects>`_
+        :calls: `GET /orgs/{org}/projects <https://docs.github.com/en/rest/reference/projects#list-organization-projects>`_
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.Project.Project`
         :param state: string
         """
@@ -855,26 +958,26 @@ class Organization(github.GithubObject.CompletableGithubObject):
         return github.PaginatedList.PaginatedList(
             github.Project.Project,
             self._requester,
-            self.url + "/projects",
+            f"{self.url}/projects",
             url_parameters,
             {"Accept": Consts.mediaTypeProjectsPreview},
         )
 
     def get_public_members(self):
         """
-        :calls: `GET /orgs/:org/public_members <http://developer.github.com/v3/orgs/members>`_
+        :calls: `GET /orgs/{org}/public_members <https://docs.github.com/en/rest/reference/orgs#members>`_
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.NamedUser.NamedUser`
         """
         return github.PaginatedList.PaginatedList(
             github.NamedUser.NamedUser,
             self._requester,
-            self.url + "/public_members",
+            f"{self.url}/public_members",
             None,
         )
 
     def get_outside_collaborators(self, filter_=github.GithubObject.NotSet):
         """
-        :calls: `GET /orgs/:org/outside_collaborators <http://developer.github.com/v3/orgs/outside_collaborators>`_
+        :calls: `GET /orgs/{org}/outside_collaborators <https://docs.github.com/en/rest/reference/orgs#outside-collaborators>`_
         :param filter_: string
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.NamedUser.NamedUser`
         """
@@ -888,41 +991,55 @@ class Organization(github.GithubObject.CompletableGithubObject):
         return github.PaginatedList.PaginatedList(
             github.NamedUser.NamedUser,
             self._requester,
-            self.url + "/outside_collaborators",
+            f"{self.url}/outside_collaborators",
             url_parameters,
         )
 
     def remove_outside_collaborator(self, collaborator):
         """
-        :calls: `DELETE /orgs/:org/outside_collaborators/:username <https://developer.github.com/v3/orgs/outside_collaborators>`_
+        :calls: `DELETE /orgs/{org}/outside_collaborators/{username} <https://docs.github.com/en/rest/reference/orgs#outside-collaborators>`_
         :param collaborator: :class:`github.NamedUser.NamedUser`
         :rtype: None
         """
         assert isinstance(collaborator, github.NamedUser.NamedUser), collaborator
         headers, data = self._requester.requestJsonAndCheck(
-            "DELETE", self.url + "/outside_collaborators/" + collaborator._identity
+            "DELETE", f"{self.url}/outside_collaborators/{collaborator._identity}"
         )
 
     def convert_to_outside_collaborator(self, member):
         """
-        :calls: `PUT /orgs/:org/outside_collaborators/:username <https://developer.github.com/v3/orgs/outside_collaborators>`_
+        :calls: `PUT /orgs/{org}/outside_collaborators/{username} <https://docs.github.com/en/rest/reference/orgs#outside-collaborators>`_
         :param member: :class:`github.NamedUser.NamedUser`
         :rtype: None
         """
         assert isinstance(member, github.NamedUser.NamedUser), member
         headers, data = self._requester.requestJsonAndCheck(
-            "PUT", self.url + "/outside_collaborators/" + member._identity
+            "PUT", f"{self.url}/outside_collaborators/{member._identity}"
+        )
+
+    def get_public_key(self):
+        """
+        :calls: `GET /orgs/{org}/actions/secrets/public-key <https://docs.github.com/en/rest/reference/actions#get-an-organization-public-key>`_
+        :rtype: :class:`github.PublicKey.PublicKey`
+        """
+        headers, data = self._requester.requestJsonAndCheck(
+            "GET", f"{self.url}/actions/secrets/public-key"
+        )
+        return github.PublicKey.PublicKey(
+            self._requester, headers, data, completed=True
         )
 
     def get_repo(self, name):
         """
-        :calls: `GET /repos/:owner/:repo <http://developer.github.com/v3/repos>`_
+        :calls: `GET /repos/{owner}/{repo} <https://docs.github.com/en/rest/reference/repos>`_
         :param name: string
         :rtype: :class:`github.Repository.Repository`
         """
         assert isinstance(name, str), name
         headers, data = self._requester.requestJsonAndCheck(
-            "GET", "/repos/" + self.login + "/" + name
+            "GET",
+            f"/repos/{self.login}/{name}",
+            headers={"Accept": Consts.repoVisibilityPreview},
         )
         return github.Repository.Repository(
             self._requester, headers, data, completed=True
@@ -935,7 +1052,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
         direction=github.GithubObject.NotSet,
     ):
         """
-        :calls: `GET /orgs/:org/repos <http://developer.github.com/v3/repos>`_
+        :calls: `GET /orgs/{org}/repos <https://docs.github.com/en/rest/reference/repos>`_
         :param type: string ('all', 'public', 'private', 'forks', 'sources', 'member')
         :param sort: string ('created', 'updated', 'pushed', 'full_name')
         :param direction: string ('asc', desc')
@@ -957,50 +1074,51 @@ class Organization(github.GithubObject.CompletableGithubObject):
         return github.PaginatedList.PaginatedList(
             github.Repository.Repository,
             self._requester,
-            self.url + "/repos",
+            f"{self.url}/repos",
             url_parameters,
+            headers={"Accept": Consts.repoVisibilityPreview},
         )
 
     def get_team(self, id):
         """
-        :calls: `GET /teams/:id <http://developer.github.com/v3/orgs/teams>`_
+        :calls: `GET /teams/{id} <https://docs.github.com/en/rest/reference/teams>`_
         :param id: integer
         :rtype: :class:`github.Team.Team`
         """
         assert isinstance(id, int), id
-        headers, data = self._requester.requestJsonAndCheck("GET", "/teams/" + str(id))
+        headers, data = self._requester.requestJsonAndCheck("GET", f"/teams/{id}")
         return github.Team.Team(self._requester, headers, data, completed=True)
 
     def get_team_by_slug(self, slug):
         """
-        :calls: `GET /orgs/:org/teams/:team_slug <https://developer.github.com/v3/teams>`_
+        :calls: `GET /orgs/{org}/teams/{team_slug} <https://docs.github.com/en/rest/reference/teams#get-a-team-by-name>`_
         :param slug: string
         :rtype: :class:`github.Team.Team`
         """
         assert isinstance(slug, str), slug
         headers, data = self._requester.requestJsonAndCheck(
-            "GET", self.url + "/teams/" + slug
+            "GET", f"{self.url}/teams/{slug}"
         )
         return github.Team.Team(self._requester, headers, data, completed=True)
 
     def get_teams(self):
         """
-        :calls: `GET /orgs/:org/teams <http://developer.github.com/v3/orgs/teams>`_
+        :calls: `GET /orgs/{org}/teams <https://docs.github.com/en/rest/reference/teams#list-teams>`_
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.Team.Team`
         """
         return github.PaginatedList.PaginatedList(
-            github.Team.Team, self._requester, self.url + "/teams", None
+            github.Team.Team, self._requester, f"{self.url}/teams", None
         )
 
     def invitations(self):
         """
-        :calls: `GET /orgs/:org/invitations <https://developer.github.com/v3/orgs/members>`_
+        :calls: `GET /orgs/{org}/invitations <https://docs.github.com/en/rest/reference/orgs#members>`_
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.NamedUser.NamedUser`
         """
         return github.PaginatedList.PaginatedList(
             github.NamedUser.NamedUser,
             self._requester,
-            self.url + "/invitations",
+            f"{self.url}/invitations",
             None,
             headers={"Accept": Consts.mediaTypeOrganizationInvitationPreview},
         )
@@ -1013,7 +1131,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
         teams=github.GithubObject.NotSet,
     ):
         """
-        :calls: `POST /orgs/:org/invitations <http://developer.github.com/v3/orgs/members>`_
+        :calls: `POST /orgs/{org}/invitations <https://docs.github.com/en/rest/reference/orgs#members>`_
         :param user: :class:`github.NamedUser.NamedUser`
         :param email: string
         :param role: string
@@ -1041,20 +1159,32 @@ class Organization(github.GithubObject.CompletableGithubObject):
             parameters["team_ids"] = [t.id for t in teams]
         headers, data = self._requester.requestJsonAndCheck(
             "POST",
-            self.url + "/invitations",
+            f"{self.url}/invitations",
             headers={"Accept": Consts.mediaTypeOrganizationInvitationPreview},
             input=parameters,
         )
 
+    def cancel_invitation(self, invitee):
+        """
+        :calls: `DELETE /orgs/{org}/invitations/{invitation_id} <https://docs.github.com/en/rest/reference/orgs#cancel-an-organization-invitation>`_
+        :param invitee: :class:`github.NamedUser.NamedUser`
+        :rtype: None
+        """
+        assert isinstance(invitee, github.NamedUser.NamedUser), invitee
+        status, headers, data = self._requester.requestJson(
+            "DELETE", f"{self.url}/invitations/{invitee.id}"
+        )
+        return status == 204
+
     def has_in_members(self, member):
         """
-        :calls: `GET /orgs/:org/members/:user <http://developer.github.com/v3/orgs/members>`_
+        :calls: `GET /orgs/{org}/members/{user} <https://docs.github.com/en/rest/reference/orgs#members>`_
         :param member: :class:`github.NamedUser.NamedUser`
         :rtype: bool
         """
         assert isinstance(member, github.NamedUser.NamedUser), member
         status, headers, data = self._requester.requestJson(
-            "GET", self.url + "/members/" + member._identity
+            "GET", f"{self.url}/members/{member._identity}"
         )
         if status == 302:
             status, headers, data = self._requester.requestJson(
@@ -1064,47 +1194,47 @@ class Organization(github.GithubObject.CompletableGithubObject):
 
     def has_in_public_members(self, public_member):
         """
-        :calls: `GET /orgs/:org/public_members/:user <http://developer.github.com/v3/orgs/members>`_
+        :calls: `GET /orgs/{org}/public_members/{user} <https://docs.github.com/en/rest/reference/orgs#members>`_
         :param public_member: :class:`github.NamedUser.NamedUser`
         :rtype: bool
         """
         assert isinstance(public_member, github.NamedUser.NamedUser), public_member
         status, headers, data = self._requester.requestJson(
-            "GET", self.url + "/public_members/" + public_member._identity
+            "GET", f"{self.url}/public_members/{public_member._identity}"
         )
         return status == 204
 
     def remove_from_membership(self, member):
         """
-        :calls: `DELETE /orgs/:org/memberships/:user <https://developer.github.com/v3/orgs/members/#remove-organization-membership>`_
+        :calls: `DELETE /orgs/{org}/memberships/{user} <https://docs.github.com/en/rest/reference/orgs#remove-an-organization-member>`_
         :param member: :class:`github.NamedUser.NamedUser`
         :rtype: None
         """
         assert isinstance(member, github.NamedUser.NamedUser), member
         headers, data = self._requester.requestJsonAndCheck(
-            "DELETE", self.url + "/memberships/" + member._identity
+            "DELETE", f"{self.url}/memberships/{member._identity}"
         )
 
     def remove_from_members(self, member):
         """
-        :calls: `DELETE /orgs/:org/members/:user <http://developer.github.com/v3/orgs/members>`_
+        :calls: `DELETE /orgs/{org}/members/{user} <https://docs.github.com/en/rest/reference/orgs#members>`_
         :param member: :class:`github.NamedUser.NamedUser`
         :rtype: None
         """
         assert isinstance(member, github.NamedUser.NamedUser), member
         headers, data = self._requester.requestJsonAndCheck(
-            "DELETE", self.url + "/members/" + member._identity
+            "DELETE", f"{self.url}/members/{member._identity}"
         )
 
     def remove_from_public_members(self, public_member):
         """
-        :calls: `DELETE /orgs/:org/public_members/:user <http://developer.github.com/v3/orgs/members>`_
+        :calls: `DELETE /orgs/{org}/public_members/{user} <https://docs.github.com/en/rest/reference/orgs#members>`_
         :param public_member: :class:`github.NamedUser.NamedUser`
         :rtype: None
         """
         assert isinstance(public_member, github.NamedUser.NamedUser), public_member
         headers, data = self._requester.requestJsonAndCheck(
-            "DELETE", self.url + "/public_members/" + public_member._identity
+            "DELETE", f"{self.url}/public_members/{public_member._identity}"
         )
 
     def create_migration(
@@ -1114,7 +1244,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
         exclude_attachments=github.GithubObject.NotSet,
     ):
         """
-        :calls: `POST /orgs/:org/migrations <https://developer.github.com/v3/migrations/users>`_
+        :calls: `POST /orgs/{org}/migrations <https://docs.github.com/en/rest/reference/migrations#list-organization-migrations>`_
         :param repos: list or tuple of str
         :param lock_repositories: bool
         :param exclude_attachments: bool
@@ -1135,7 +1265,7 @@ class Organization(github.GithubObject.CompletableGithubObject):
             post_parameters["exclude_attachments"] = exclude_attachments
         headers, data = self._requester.requestJsonAndCheck(
             "POST",
-            "/orgs/" + self.login + "/migrations",
+            f"/orgs/{self.login}/migrations",
             input=post_parameters,
             headers={"Accept": Consts.mediaTypeMigrationPreview},
         )
@@ -1145,27 +1275,27 @@ class Organization(github.GithubObject.CompletableGithubObject):
 
     def get_migrations(self):
         """
-        :calls: `GET /orgs/:org/migrations <https://developer.github.com/v3/migrations/users>`_
+        :calls: `GET /orgs/{org}/migrations <https://docs.github.com/en/rest/reference/migrations#list-organization-migrations>`_
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.Migration.Migration`
         """
         return github.PaginatedList.PaginatedList(
             github.Migration.Migration,
             self._requester,
-            "/orgs/" + self.login + "/migrations",
+            f"/orgs/{self.login}/migrations",
             None,
             headers={"Accept": Consts.mediaTypeMigrationPreview},
         )
 
     def get_installations(self):
         """
-        :calls: `GET /orgs/:org/installations <https://developer.github.com/v3/orgs/#list-app-installations-for-an-organization>`_
+        :calls: `GET /orgs/{org}/installations <https://docs.github.com/en/rest/reference/orgs#list-app-installations-for-an-organization>`_
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.Installation.Installation`
         """
 
         return github.PaginatedList.PaginatedList(
             github.Installation.Installation,
             self._requester,
-            self.url + "/installations",
+            f"{self.url}/installations",
             None,
             None,
             list_item="installations",

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 ############################ Copyrights and license ############################
 #                                                                              #
@@ -45,17 +44,20 @@ import textwrap
 
 import setuptools
 
-version = "1.54"
-
-
 if __name__ == "__main__":
     setuptools.setup(
         name="PyGithub",
-        version=version,
+        use_scm_version=True,
+        setup_requires=["setuptools_scm"],
         description="Use the full Github API v3",
         author="Vincent Jacques",
         author_email="vincent@vincent-jacques.net",
-        url="http://pygithub.readthedocs.io/en/latest/",
+        url="https://github.com/pygithub/pygithub",
+        project_urls={
+            "Documentation": "http://pygithub.readthedocs.io/en/latest/",
+            "Source": "https://github.com/pygithub/pygithub",
+            "Tracker": "https://github.com/pygithub/pygithub/issues",
+        },
         long_description=textwrap.dedent(
             """\
             (Very short) Tutorial
@@ -92,14 +94,21 @@ if __name__ == "__main__":
             "Operating System :: OS Independent",
             "Programming Language :: Python",
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
             "Topic :: Software Development",
         ],
-        python_requires=">=3.6",
-        install_requires=["deprecated", "pyjwt", "requests>=2.14.0"],
-        extras_require={"integrations": ["cryptography"]},
-        tests_require=["cryptography", "httpretty>=1.0.3"],
+        python_requires=">=3.7",
+        install_requires=[
+            "deprecated",
+            "pyjwt[crypto]>=2.4.0",
+            "pynacl>=1.4.0",
+            "requests>=2.14.0",
+        ],
+        # can be removed, still here to avoid breaking user code
+        extras_require={"integrations": []},
+        tests_require=["httpretty>=1.0.3"],
     )

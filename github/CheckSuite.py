@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2020 Raju Subramanian <coder@mahesh.net>                           #
@@ -163,12 +161,12 @@ class CheckSuite(github.GithubObject.CompletableGithubObject):
 
     def rerequest(self):
         """
-        :calls: `POST /repos/:owner/:repo/check-suites/:check_suite_id/rerequest <https://docs.github.com/en/rest/reference/checks#rerequest-a-check-suite>`_
+        :calls: `POST /repos/{owner}/{repo}/check-suites/{check_suite_id}/rerequest <https://docs.github.com/en/rest/reference/checks#rerequest-a-check-suite>`_
         :rtype: bool
         """
         request_headers = {"Accept": "application/vnd.github.v3+json"}
         status, _, _ = self._requester.requestJson(
-            "POST", self.url + "/rerequest", headers=request_headers
+            "POST", f"{self.url}/rerequest", headers=request_headers
         )
         return status == 201
 
@@ -179,7 +177,7 @@ class CheckSuite(github.GithubObject.CompletableGithubObject):
         filter=github.GithubObject.NotSet,
     ):
         """
-        :calls: `GET /repos/:owner/:repo/check-suites/:check_suite_id/check-runs <https://docs.github.com/en/rest/reference/checks#list-check-runs-in-a-check-suite>`_
+        :calls: `GET /repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs <https://docs.github.com/en/rest/reference/checks#list-check-runs-in-a-check-suite>`_
         :param check_name: string
         :param status: string
         :param filter: string
@@ -195,12 +193,12 @@ class CheckSuite(github.GithubObject.CompletableGithubObject):
             url_parameters["check_name"] = check_name
         if status is not github.GithubObject.NotSet:
             url_parameters["status"] = status
-        if status is not github.GithubObject.NotSet:
+        if filter is not github.GithubObject.NotSet:
             url_parameters["filter"] = filter
         return github.PaginatedList.PaginatedList(
             github.CheckRun.CheckRun,
             self._requester,
-            self.url + "/check-runs",
+            f"{self.url}/check-runs",
             url_parameters,
             headers={"Accept": "application/vnd.github.v3+json"},
             list_item="check_runs",

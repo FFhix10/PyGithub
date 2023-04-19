@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2013 Vincent Jacques <vincent@vincent-jacques.net>                 #
@@ -32,16 +30,14 @@ class Equality(Framework.TestCase):
     def testUserEquality(self):
         u1 = self.g.get_user("jacquev6")
         u2 = self.g.get_user("jacquev6")
-        self.assertTrue(u1 == u2)
-        self.assertFalse(u1 != u2)
         self.assertEqual(u1, u2)
+        self.assertEqual(hash(u1), hash(u2))
 
     def testUserDifference(self):
         u1 = self.g.get_user("jacquev6")
         u2 = self.g.get_user("OddBloke")
-        self.assertFalse(u1 == u2)
-        self.assertTrue(u1 != u2)
         self.assertNotEqual(u1, u2)
+        self.assertNotEqual(hash(u1), hash(u2))
 
     def testBranchEquality(self):
         # Erf, equality of NonCompletableGithubObjects will be difficult to implement

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2012 Vincent Jacques <vincent@vincent-jacques.net>                 #
@@ -37,7 +35,9 @@ import sys
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath(".."))
-from setup import version as setupVersion  # noqa: E402, isort:skip
+from importlib.metadata import version  # noqa: E402, isort:skip
+
+setupVersion = version("pygithub")
 
 # -- General configuration -----------------------------------------------------
 
@@ -61,8 +61,8 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"PyGithub"
-copyright = u"%d, Vincent Jacques" % datetime.date.today().year
+project = "PyGithub"
+copyright = "%d, Vincent Jacques" % datetime.date.today().year
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -204,7 +204,7 @@ htmlhelp_basename = "PyGithubdoc"
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "PyGithub.tex", u"PyGithub Documentation", u"Vincent Jacques", "manual"),
+    ("index", "PyGithub.tex", "PyGithub Documentation", "Vincent Jacques", "manual"),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -232,7 +232,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [("index", "pygithub", u"PyGithub Documentation", [u"Vincent Jacques"], 1)]
+man_pages = [("index", "pygithub", "PyGithub Documentation", ["Vincent Jacques"], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -247,8 +247,8 @@ texinfo_documents = [
     (
         "index",
         "PyGithub",
-        u"PyGithub Documentation",
-        u"Vincent Jacques",
+        "PyGithub Documentation",
+        "Vincent Jacques",
         "PyGithub",
         "One line description of project.",
         "Miscellaneous",

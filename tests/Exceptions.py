@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2012 Vincent Jacques <vincent@vincent-jacques.net>                 #
@@ -92,7 +90,12 @@ class Exceptions(Framework.TestCase):
         self.assertEqual(str(raisedexp.exception), '401 {"message": "Bad credentials"}')
 
     def testExceptionPickling(self):
-        pickle.loads(pickle.dumps(github.GithubException("foo", "bar")))
+        pickle.loads(pickle.dumps(github.GithubException("foo", "bar", None)))
+
+    def testJSONParseError(self):
+        # Replay data was forged to force a JSON error
+        with self.assertRaises(ValueError):
+            self.g.get_user("jacquev6")
 
 
 class SpecificExceptions(Framework.TestCase):
@@ -136,7 +139,9 @@ class SpecificExceptions(Framework.TestCase):
                 res = self.g.search_code("jacquev6")
                 res.get_page(0)
 
-        self.assertRaises(github.RateLimitExceededException, exceed)
+        with self.assertRaises(github.RateLimitExceededException) as raised:
+            exceed()
+        self.assertEqual(raised.exception.headers.get("retry-after"), "60")
 
     def testIncompletableObject(self):
         github.UserKey.UserKey.setCheckAfterInitFlag(False)

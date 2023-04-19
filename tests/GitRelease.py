@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2015 Ed Holland <eholland@alertlogic.com>                          #
@@ -141,7 +139,7 @@ class GitRelease(Framework.TestCase):
         self.assertEqual(release.author.type, "User")
         self.assertEqual(
             release.html_url,
-            "https://github.com/{}/{}/releases/tag/{}".format(user, repo_name, tag),
+            f"https://github.com/{user}/{repo_name}/releases/tag/{tag}",
         )
         self.assertEqual(release.created_at, create_date)
         self.assertEqual(release.published_at, publish_date)
@@ -158,6 +156,12 @@ class GitRelease(Framework.TestCase):
             ),
         )
         self.assertEqual(repr(release), 'GitRelease(title="Test")')
+        self.assertEqual(len(release.assets), 1)
+        self.assertEqual(
+            repr(release.assets[0]),
+            'GitReleaseAsset(url="https://api.github.com/repos/'
+            f'{user}/{repo_name}/releases/assets/{release.raw_data["assets"][0]["id"]}")',
+        )
 
     def testGetRelease(self):
         release_by_id = self.release
@@ -208,7 +212,9 @@ class GitRelease(Framework.TestCase):
     def testUploadAssetWithName(self):
         self.setUpNewRelease()
         release = self.new_release
-        r = release.upload_asset(self.artifact_path, name="foobar.zip")
+        r = release.upload_asset(
+            self.artifact_path, name="foobar.zip", content_type="application/zip"
+        )
         self.assertEqual(r.name, "foobar.zip")
         self.tearDownNewRelease()
 

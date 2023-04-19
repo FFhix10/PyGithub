@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2012 Vincent Jacques <vincent@vincent-jacques.net>                 #
@@ -37,6 +35,7 @@ like :class:`github.NamedUser.NamedUser` or :class:`github.Repository.Repository
 All classes inherit from :class:`github.GithubObject.GithubObject`.
 """
 __all__ = [
+    "AppAuthentication",
     "BadAttributeException",
     "BadCredentialsException",
     "BadUserAgentException",
@@ -55,7 +54,9 @@ __all__ = [
 
 import logging
 
-from github.MainClass import Github, GithubIntegration
+from github.AppAuthentication import AppAuthentication
+from github.GithubIntegration import GithubIntegration
+from github.MainClass import Github
 
 from .GithubException import (
     BadAttributeException,

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2020 Colby Gallup <colbygallup@gmail.com>                          #
@@ -28,7 +26,7 @@ import github.GithubObject
 
 class DeploymentStatus(github.GithubObject.CompletableGithubObject):
     """
-    This class represents Deployment Statuses. The reference can be found here https://developer.github.com/v3/repos/deployments/
+    This class represents Deployment Statuses. The reference can be found here https://docs.github.com/en/rest/reference/repos#deployments
     """
 
     def __repr__(self):

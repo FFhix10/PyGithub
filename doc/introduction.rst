@@ -15,10 +15,7 @@ First create a Github instance::
 
     from github import Github
     
-    # using username and password
-    g = Github("user", "password")
-    
-    # or using an access token
+    # using an access token
     g = Github("access_token")
 
     # Github Enterprise with custom hostname
@@ -39,9 +36,6 @@ This package is in the `Python Package Index
 <http://pypi.python.org/pypi/PyGithub>`__, so ``pip install PyGithub`` should
 be enough.  You can also clone it on `Github
 <http://github.com/PyGithub/PyGithub>`__.
-
-If you wish to use GitHub Integrations, you'll want to be sure to install the
-'integrations' option: ``pip install PyGithub['integrations']``
 
 Licensing
 ---------

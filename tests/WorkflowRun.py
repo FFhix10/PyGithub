@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2020 Steve Kowalik <steven@wedontsleep.org>                        #
@@ -107,3 +105,7 @@ class WorkflowRun(Framework.TestCase):
 
     def test_cancel(self):
         self.assertTrue(self.workflow_run.cancel())
+
+    def test_delete(self):
+        wr = self.repo.get_workflow_run(1327550476)
+        self.assertTrue(wr.delete())

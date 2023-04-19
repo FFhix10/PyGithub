@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ############################ Copyrights and license ############################
 #                                                                              #
 # Copyright 2019 Rigas Papathanasopoulos <rigaspapas@gmail.com>                #
@@ -33,7 +31,7 @@ class AccessToken(github.GithubObject.NonCompletableGithubObject):
     def __repr__(self):
         return self.get__repr__(
             {
-                "token": "{}...".format(self.token[:5]),
+                "token": f"{self.token[:5]}...",
                 "scope": self.scope,
                 "type": self.type,
             }
